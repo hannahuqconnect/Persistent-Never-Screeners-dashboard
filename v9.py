@@ -109,16 +109,6 @@ def interpolate_all_data(df, participation_multiplier):
     # Get all unique outcomes
     outcomes = df['Outcome'].unique()
 
-    # Comparator
-    if participation_multiplier == 0:
-        result_df = df[df['Scenario'] == '1.0x'].copy()
-        result_df['Scenario'] = f'{participation_multiplier:.2f}x'
-
-        # Reset all values in row 'persistent_never_screeners' to 0
-        result_df.loc[
-            result_df['Outcome'] == 'persistent_never_screeners', result_df.columns.difference(['Outcome'])] = 0
-        return result_df
-
     # Check bounds
     min_mult = min(available_scenarios.keys())
     max_mult = max(available_scenarios.keys())
@@ -360,18 +350,6 @@ def interpolate_total_data(df, participation_multiplier):
         1.25: '1.25x',
         1.5: '1.5x'
     }
-
-    # Comparator
-    if participation_multiplier == 0:
-        result_row = df[df['Scenario'] == '1.0x']
-        result_dict = result_row.iloc[0].to_dict()
-        result_dict['Scenario'] = f'{participation_multiplier:.2f}x'
-        # Convert all numpy types to regular Python types
-        result_dict = {k: float(v) if isinstance(v, (np.integer, np.floating)) else v
-                       for k, v in result_dict.items()}
-        result_dict['Letters_only'] = 0
-        result_dict['Letters_only_discounted'] = 0
-        return result_dict
 
     # Clamp to valid range
     if participation_multiplier < 0.5:
@@ -686,8 +664,7 @@ treatment_cost_multiplier = st.sidebar.slider(
 )
 
 # Generate scenario data with interpolation
-# comparator_data = interpolate_all_data(annual_df, 1.0)  # Baseline
-comparator_data = interpolate_all_data(annual_df, 0)  # Baseline
+comparator_data = interpolate_all_data(annual_df, 1.0)  # Baseline
 scenario_data = interpolate_all_data(annual_df, participation_rate)  #1.5)#
 
 comparator_data = add_cost_calculations(comparator_data)
@@ -697,8 +674,7 @@ comparator_df = calculate_totals(comparator_data)
 scenario_df = calculate_totals(scenario_data)
 
 
-# lifetime_comparator_results = get_lifetime_results(total_df, 1.0)
-lifetime_comparator_results = get_lifetime_results(total_df, 0)
+lifetime_comparator_results = get_lifetime_results(total_df, 1.0)
 lifetime_scenario_results = get_lifetime_results(total_df, participation_rate)
 print(lifetime_comparator_results)
 print(lifetime_scenario_results)
