@@ -1,0 +1,23 @@
+digraph NBCSP_Flow {
+	fontname=Arial rankdir=TB splines=ortho
+	pop [label="Eligible Population" color=black fillcolor="#7FB3D5" fontname=Arial fontsize=12 shape=box style="rounded,filled"]
+	never [label="Persistent Never-Screeners
+Letter Only Sent" color=black fillcolor="#F5B041" fontname=Arial fontsize=12 shape=box style="rounded,filled"]
+	kit [label="iFOBT Kit Recipients
+Kit Sent" color=black fillcolor="#5DADE2" fontname=Arial fontsize=12 shape=box style="rounded,filled"]
+	proc [label="Kits Returned & Processed
+Analysis Performed" color=black fillcolor="#BB8FCE" fontname=Arial fontsize=12 shape=box style="rounded,filled"]
+	pos [label="Positive iFOBT Result" color=black fillcolor="#F39C12" fontname=Arial fontsize=12 shape=box style="rounded,filled"]
+	col_no [label="Colonoscopy - No Complications
+(98% of procedures)
+$1289" color=black fillcolor="#52BE80" fontname=Arial fontsize=12 shape=box style="rounded,filled"]
+	col_comp [label="Colonoscopy - With Complications
+(2% of procedures)" color=black fillcolor="#EC7063" fontname=Arial fontsize=12 shape=box style="rounded,filled"]
+	pop -> never [label="Letter only: $1.50" fontcolor=dimgray fontsize=10]
+	pop -> kit [label="Letter + iFOBT kit: $10.00" fontcolor=dimgray fontsize=10]
+	kit -> proc [label="Return & analysis
+Base: $13.50 | Incorrect (5%): $23.50" fontcolor=dimgray fontsize=10]
+	proc -> pos [label="No additional cost" color=darkorange fontsize=10 style=dashed]
+	pos -> col_no [label="→ GP + Colonoscopy" fontcolor=dimgray fontsize=10]
+	pos -> col_comp [label="→ GP + Colonoscopy" fontcolor=dimgray fontsize=10]
+}
