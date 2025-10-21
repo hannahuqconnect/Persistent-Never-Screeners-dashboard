@@ -9,7 +9,7 @@ import math
 st.set_page_config(page_title="NBCSP Cost-Effectiveness Dashboard", layout="wide")
 
 #The password to access the data - could remove, not so important
-PASSWORD = "dohacneverscreeners"
+PASSWORD = "111"  #"dohacneverscreeners"
 
 # #Verify password before continuing
 # def check_password():
@@ -61,7 +61,7 @@ prob_incorrectCompleteFOBT = list_cost[11]
 # print(prob_incorrectCompleteFOBT)
 COL_complication_rate = list_cost[12]
 # print(COL_complication_rate)
-cost_letter = 2.49  # Mailing the letter, default same as mailing a kit
+cost_letter = list_cost[0]  # Mailing the letter, default same as mailing a kit
 
 @st.cache_data
 def get_outcome_data(df, outcome, year):
@@ -668,16 +668,16 @@ lifetime_year = 2099
 # Individual cost parameters
 st.sidebar.subheader("Unit Cost Parameters (AUD)")
 
-# # Initialize defaults in session state if not present
-# if 'unit_costs_initialized' not in st.session_state:
-#     st.session_state['letter_postage_cost'] = cost_letter
-#     st.session_state['kit_postage_cost'] = postage
-#     st.session_state['fobt_kit_cost'] = cost_test_kit
-#     st.session_state['process_kit_cost'] = cost_process_kit
-#     st.session_state['gp_consult_cost'] = cost_GP_consultation
-#     st.session_state['colonoscopy_no_comp_cost'] = cost_COL_no_complication
-#     st.session_state['colonoscopy_comp_cost'] = cost_COL_w_complication
-#     st.session_state['unit_costs_initialized'] = True
+# Initialize defaults in session state if not present
+if 'unit_costs_initialized' not in st.session_state:
+    st.session_state['letter_postage_cost'] = cost_letter
+    st.session_state['kit_postage_cost'] = postage
+    st.session_state['fobt_kit_cost'] = cost_test_kit
+    st.session_state['process_kit_cost'] = cost_process_kit
+    st.session_state['gp_consult_cost'] = cost_GP_consultation
+    st.session_state['colonoscopy_no_comp_cost'] = cost_COL_no_complication
+    st.session_state['colonoscopy_comp_cost'] = cost_COL_w_complication
+    st.session_state['unit_costs_initialized'] = True
 
 # Add reset button
 if st.sidebar.button("Reset to Default Values"):
@@ -763,7 +763,13 @@ lifetime_scenario_results = get_lifetime_results(total_df, participation_rate)
 # Display current interpolation info
 # if participation_rate not in [0.5, 0.75, 1.0, 1.25, 1.5]:
 # st.info(f"Current analysis uses {participation_rate:.2f}x participation rate vs the baseline for persistent never-screeners.")
-st.info(f"Current analysis assumes all persistent never-screeners receive an NBCSP letter only, with only those who request a kit receiving one. It simulates a {participation_rate*100:.1f}% participation rate vs the baseline for persistent never-screeners and a ${cost_letter} cost per letter sent to this group. The comparator is the current NBCSP status quo, with kits being sent to persistent never-screeners.")
+if participation_percentage > 0:
+    st.info(f"Current analysis assumes all persistent never-screeners receive an NBCSP letter only, with only those who request a kit receiving one. It simulates a relative {participation_percentage:.1f}% participation increase vs the baseline for persistent never-screeners and a ${unit_costs['letter']:.2f} cost per letter sent to this group. The comparator is the current NBCSP status quo, with kits being sent to persistent never-screeners.")
+elif participation_percentage < 0:
+    st.info(f"Current analysis assumes all persistent never-screeners receive an NBCSP letter only, with only those who request a kit receiving one. It simulates a relative {-participation_percentage:.1f}% participation decrease vs the baseline for persistent never-screeners and a ${unit_costs['letter']:.2f} cost per letter sent to this group. The comparator is the current NBCSP status quo, with kits being sent to persistent never-screeners.")
+else:
+    st.info(f"Current analysis assumes all persistent never-screeners receive an NBCSP letter only, with only those who request a kit receiving one. It simulates no participation change vs the baseline for persistent never-screeners and a ${unit_costs['letter']:.2f} cost per letter sent to this group. The comparator is the current NBCSP status quo, with kits being sent to persistent never-screeners.")
+
 st.markdown("### Key Metrics Overview")
 # st.markdown("Showing **differences** between selected scenario and comparator (2026-2045), except where noted")
 st.markdown("Showing **annual differences** between the selected scenario and the comparator (2026-2045), except where noted")
