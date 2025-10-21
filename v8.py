@@ -9,7 +9,7 @@ import math
 st.set_page_config(page_title="NBCSP Cost-Effectiveness Dashboard", layout="wide")
 
 #The password to access the data - could remove, not so important
-PASSWORD = "111"  #"dohacneverscreeners"
+PASSWORD = "dohacneverscreeners"
 
 # #Verify password before continuing
 # def check_password():
