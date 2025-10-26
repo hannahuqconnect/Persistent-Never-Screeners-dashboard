@@ -1386,7 +1386,7 @@ with tab3:
         line=dict(color='green', width=2),
         stackgroup='one',
         fillcolor='rgba(0,128,0,0.2)',
-        hovertemplate='%{x}: %{y:,.1f} M AUD'
+        hovertemplate='%{y:,.1f} M AUD'
     ))
 
     # Colonoscopy costs
@@ -1398,7 +1398,7 @@ with tab3:
         line=dict(color='blue', width=2),
         stackgroup='one',
         fillcolor='rgba(0,0,255,0.2)',
-        hovertemplate='%{x}: %{y:,.1f} M AUD'
+        hovertemplate='%{y:,.1f} M AUD'
     ))
 
     # Treatment costs
@@ -1410,7 +1410,7 @@ with tab3:
         line=dict(color='orange', width=2),
         stackgroup='one',
         fillcolor='rgba(255,165,0,0.2)',
-        hovertemplate='%{x}: %{y:,.1f} M AUD'
+        hovertemplate='%{y:,.1f} M AUD'  #'%{x}: %{y:,.1f} M AUD'
     ))
 
     fig_costs.update_layout(
