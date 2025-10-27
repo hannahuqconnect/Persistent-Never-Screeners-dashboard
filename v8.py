@@ -1424,7 +1424,7 @@ with tab3:
     # st.markdown(
     #     "**Note:** Annual costs decline sharply in later years as many in the modelled cohort gradually reach the maximum model age. To avoid this artefact, cumulative costs are shown instead of yearly values."
     # )
-    st.subheader("Cost Differences")
+    st.subheader("Differences in Costs vs Comparator")
     # --- Cost summary table ---
     cost_metrics = [
         ('screening_cost', 'Total Screening Costs'),
