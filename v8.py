@@ -606,7 +606,7 @@ st.markdown(
     # Adjust participation and cost assumptions to see how outcomes change over time.
     # """
     """
-    This dashboard models the **cost-effectiveness** and **health outcomes** of alternative outreach strategies for persistent never-screeners in the National Bowel Cancer Screening Program (NBCSP). **Persistent never-screeners** are those who have received at least three NBCSP kits but have not participated in screening.
+    This dashboard models the **cost-effectiveness** and **health outcomes** of alternative outreach strategies for persistent never-screeners in the National Bowel Cancer Screening Program (NBCSP). **Persistent never-screeners** are those who have received at least three NBCSP kits but have not participated in screening. The **modelled cohort** includes all individuals eligible for NBCSP screening between 2026 and 2045, i.e. people born between 1952 and 2000.
     """
 )
 # st.markdown(
@@ -615,9 +615,11 @@ st.markdown(
 #     "Results may be shown either for this period (2026–2045) or for the **lifetime of the modelled cohort**, "
 #     "which follows the same individuals beyond 2045 until death to capture the longer-term impact of screening."
 # )
-st.markdown(
-    "Using the left panel, adjust **participation** and **cost assumptions** to see how NBCSP outcomes change. The analysis models the cohort of people who are eligible for NBCSP screening between 2026 and 2045."
-)
+# st.markdown(
+#     "Using the left panel, adjust **participation** and **cost assumptions** to see how NBCSP outcomes change. The analysis models the cohort of people who are eligible for NBCSP screening between 2026 and 2045."
+# )
+st.markdown("Using the left panel, adjust **participation** and **cost assumptions** to see how NBCSP outcomes change.")
+# st.markdown("The **modelled cohort** includes all individuals eligible for NBCSP screening between 2026 and 2045, i.e. people born between 1952 and 2000.")
 # Sidebar controls
 st.sidebar.header("Analysis Configuration")
 
@@ -764,15 +766,15 @@ lifetime_scenario_results = get_lifetime_results(total_df, participation_rate)
 # if participation_rate not in [0.5, 0.75, 1.0, 1.25, 1.5]:
 # st.info(f"Current analysis uses {participation_rate:.2f}x participation rate vs the baseline for persistent never-screeners.")
 if participation_percentage > 0:
-    st.info(f"Current analysis assumes all persistent never-screeners receive an NBCSP letter only, with only those who request a kit receiving one. It simulates a relative {participation_percentage:.1f}% participation increase vs the baseline for persistent never-screeners and a ${unit_costs['letter']:.2f} cost per letter sent to this group. The comparator is the current NBCSP status quo, with kits being sent to persistent never-screeners.")
+    st.info(f"Current analysis assumes all persistent never-screeners receive an NBCSP letter only, with only those who request a kit receiving one. It simulates a relative {participation_percentage:.1f}% participation increase vs the comparator for persistent never-screeners and a ${unit_costs['letter']:.2f} cost per letter sent to this group. The comparator is the current NBCSP status quo, with kits being sent to persistent never-screeners.")
 elif participation_percentage < 0:
-    st.info(f"Current analysis assumes all persistent never-screeners receive an NBCSP letter only, with only those who request a kit receiving one. It simulates a relative {-participation_percentage:.1f}% participation decrease vs the baseline for persistent never-screeners and a ${unit_costs['letter']:.2f} cost per letter sent to this group. The comparator is the current NBCSP status quo, with kits being sent to persistent never-screeners.")
+    st.info(f"Current analysis assumes all persistent never-screeners receive an NBCSP letter only, with only those who request a kit receiving one. It simulates a relative {-participation_percentage:.1f}% participation decrease vs the comparator for persistent never-screeners and a ${unit_costs['letter']:.2f} cost per letter sent to this group. The comparator is the current NBCSP status quo, with kits being sent to persistent never-screeners.")
 else:
-    st.info(f"Current analysis assumes all persistent never-screeners receive an NBCSP letter only, with only those who request a kit receiving one. It simulates no participation change vs the baseline for persistent never-screeners and a ${unit_costs['letter']:.2f} cost per letter sent to this group. The comparator is the current NBCSP status quo, with kits being sent to persistent never-screeners.")
+    st.info(f"Current analysis assumes all persistent never-screeners receive an NBCSP letter only, with only those who request a kit receiving one. It simulates no participation change vs the comparator for persistent never-screeners and a ${unit_costs['letter']:.2f} cost per letter sent to this group. The comparator is the current NBCSP status quo, with kits being sent to persistent never-screeners.")
 
 st.markdown("### Key Metrics Overview")
 # st.markdown("Showing **differences** between selected scenario and comparator (2026-2045), except where noted")
-st.markdown("Showing **annual differences** between the selected scenario and the comparator (2026-2045), except where noted")
+st.markdown("Showing **annual differences** between the selected scenario and the comparator (2026-2045)")  #, except where noted")
 
 # Key metrics display
 
@@ -807,6 +809,22 @@ with col1:
     # st.caption(f"2026-2045 total: {total_invitation_display} ({pct_letters:.1f}%)")
 
 with col2:
+    comparator_letters_only = comparator_df[comparator_df['Outcome'] == 'persistent_never_screeners'][f'total_{start_year}_{end_year}'].iloc[0]
+    comparator_total_invitation = \
+        comparator_df[comparator_df['Outcome'] == 'Invitation_sent_total'][f'total_{start_year}_{end_year}'].iloc[0]
+    comparator_fobt_sent = comparator_total_invitation - comparator_letters_only
+    total_fobt_sent = scenario_total_invitation - total_letters_only
+    diff_fobt_sent = total_fobt_sent - comparator_fobt_sent
+    pct_fobt_sent = (diff_fobt_sent / comparator_fobt_sent * 100) if comparator_fobt_sent != 0 else 0
+
+    st.metric(
+        "iFOBT Kits Sent",
+        f"{diff_fobt_sent / 1_000_000 / 20:+.1f}M",
+        delta=f"{pct_fobt_sent:+.1f}%"
+    )
+
+
+with col3:
     total_fobt = scenario_df[scenario_df['Outcome'] == 'kits_returned_total'][f'total_{start_year}_{end_year}'].iloc[0]
     comparator_fobt = \
     comparator_df[comparator_df['Outcome'] == 'kits_returned_total'][f'total_{start_year}_{end_year}'].iloc[0]
@@ -820,7 +838,9 @@ with col2:
     )
     # st.caption(f"2026-2045 total: {total_fobt:,.0f}")
 
-with col3:
+# st.markdown("#### Health & Cost Impact")
+col4, col5, col6 = st.columns(3)
+with col4:
     total_incidence = scenario_df[scenario_df['Outcome'] == 'CRC_cases'][f'total_{start_year}_{end_year}'].iloc[0]
     comparator_incidence = \
     comparator_df[comparator_df['Outcome'] == 'CRC_cases'][f'total_{start_year}_{end_year}'].iloc[0]
@@ -835,10 +855,7 @@ with col3:
         delta=f"{pct_cases:+.1f}%"
     )
     # st.caption(f"2026-2045 total: {total_incidence:,.0f}")
-
-# st.markdown("#### Health & Cost Impact")
-col4, col5, col6 = st.columns(3)
-with col4:
+with col5:
     total_cost = scenario_df[scenario_df['Outcome'] == 'total_cost'][f'total_{start_year}_{end_year}'].iloc[0]
     comparator_total_cost = \
     comparator_df[comparator_df['Outcome'] == 'total_cost'][f'total_{start_year}_{end_year}'].iloc[0]
@@ -854,22 +871,22 @@ with col4:
     )
     # st.caption(f"2026-2045 total: ${total_cost / 1_000_000:.1f}M")
 
-with col5:
-    # Lifetime costs
-    total_cost_lifetime = \
-    scenario_df[scenario_df['Outcome'] == 'total_cost'][f'total_{start_year}_{lifetime_year}'].iloc[0]
-    comparator_cost_lifetime = \
-    comparator_df[comparator_df['Outcome'] == 'total_cost'][f'total_{start_year}_{lifetime_year}'].iloc[0]
-    cost_diff_lifetime = total_cost_lifetime - comparator_cost_lifetime
-    pct_cost_lifetime = (cost_diff_lifetime / comparator_cost_lifetime * 100) if comparator_cost_lifetime != 0 else 0
-
-    st.metric(
-        "Lifetime Total Cost (Modelled Cohort)",
-        f"${cost_diff_lifetime / 1_000_000:+.1f}M",
-        delta=f"{pct_cost_lifetime:+.1f}%"
-    )
-    # st.caption(
-    #     f"Lifetime total: ${total_cost_lifetime / 1_000_000:.1f}M")
+# with col6:
+#     # Lifetime costs
+#     total_cost_lifetime = \
+#     scenario_df[scenario_df['Outcome'] == 'total_cost'][f'total_{start_year}_{lifetime_year}'].iloc[0]
+#     comparator_cost_lifetime = \
+#     comparator_df[comparator_df['Outcome'] == 'total_cost'][f'total_{start_year}_{lifetime_year}'].iloc[0]
+#     cost_diff_lifetime = total_cost_lifetime - comparator_cost_lifetime
+#     pct_cost_lifetime = (cost_diff_lifetime / comparator_cost_lifetime * 100) if comparator_cost_lifetime != 0 else 0
+#
+#     st.metric(
+#         "Lifetime Total Cost (Modelled Cohort)",
+#         f"${cost_diff_lifetime / 1_000_000:+.1f}M",
+#         delta=f"{pct_cost_lifetime:+.1f}%"
+#     )
+#     # st.caption(
+#     #     f"Lifetime total: ${total_cost_lifetime / 1_000_000:.1f}M")
 
 # if cost_diff_lifetime > 0:
 #     st.markdown(
@@ -1364,7 +1381,10 @@ with tab2:
         st.markdown(trend_text)
 
     display_crc_trend(participation_percentage)
-
+    st.markdown(
+        "<p style='font-size: 0.85em; color: gray;'>Note: The modelled cohort includes all individuals eligible for NBCSP screening between 2026 and 2045, i.e. people born between 1952 and 2000.</p>",
+        unsafe_allow_html=True
+    )
 
 with tab3:
 #     st.subheader("Cumulative Cost Analysis")
@@ -1421,6 +1441,11 @@ with tab3:
     )
 
     st.plotly_chart(fig_costs, use_container_width=True)
+    st.markdown(
+        "<p style='font-size: 0.85em; color: gray;'>Note: The modelled cohort includes all individuals eligible for NBCSP screening between 2026 and 2045, i.e. people born between 1952 and 2000.</p>",
+        unsafe_allow_html=True
+    )
+
     # st.markdown(
     #     "**Note:** Annual costs decline sharply in later years as many in the modelled cohort gradually reach the maximum model age. To avoid this artefact, cumulative costs are shown instead of yearly values."
     # )
@@ -2038,3 +2063,8 @@ with tab4:
     #     st.info("Cannot create cost-effectiveness plot: No change in life-years from the selected scenario")
     #     st.markdown(
     #         "The selected scenario has no measurable impact on life years, making cost-effectiveness analysis not applicable.")
+
+    st.markdown(
+        "<p style='font-size: 0.85em; color: gray;'>Note: The modelled cohort includes all individuals eligible for NBCSP screening between 2026 and 2045, i.e. people born between 1952 and 2000.</p>",
+        unsafe_allow_html=True
+    )
