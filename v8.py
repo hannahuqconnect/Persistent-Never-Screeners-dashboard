@@ -8,16 +8,9 @@ import math
 # Set page config
 st.set_page_config(page_title="NBCSP Cost-Effectiveness Dashboard", layout="wide")
 
-#The password to access the data - could remove, not so important
+#The password to access the data
 PASSWORD = "dohacneverscreeners"
 
-# #Verify password before continuing
-# def check_password():
-#     password = st.text_input("Enter password", type="password")
-#     if password != PASSWORD:
-#         st.stop()
-#
-# # check_password()
 
 st.sidebar.title("Login")
 user_pass = st.sidebar.text_input("Enter password:", type="password")
@@ -595,54 +588,15 @@ def get_cumulative_outcome(data, outcome, years):
 # Title and description
 st.title("NBCSP Cost-Effectiveness Dashboard")
 
-# st.subheader(
-#     # "Replacing iFOBT Kits with Letters for Persistent Never-Screeners"
-#     "Sending Letters Instead of iFOBT Kits to Persistent Never-Screeners"
-# )
-
 st.markdown(
-    # """
-    # This dashboard models the **cost-effectiveness and health outcomes** associated with sending letters to persistent never-screeners instead of iFOBT kits.
-    # Adjust participation and cost assumptions to see how outcomes change over time.
-    # """
     """
     This dashboard models the **cost-effectiveness** and **health outcomes** of alternative outreach strategies for persistent never-screeners in the National Bowel Cancer Screening Program (NBCSP). **Persistent never-screeners** are those who have received at least three NBCSP kits but have not participated in screening. The **modelled cohort** includes all individuals eligible for NBCSP screening between 2026 and 2045, i.e. people born between 1952 and 2000.
     """
 )
-# st.markdown(
-#     "For this analysis, **Persistent never-screeners** are defined as individuals who have received at least three NBCSP kits but have not participated in screening.  \n\n"
-#     "The analysis models the cohort who are eligible for NBCSP screening between 2026 and 2045. "
-#     "Results may be shown either for this period (2026–2045) or for the **lifetime of the modelled cohort**, "
-#     "which follows the same individuals beyond 2045 until death to capture the longer-term impact of screening."
-# )
-# st.markdown(
-#     "Using the left panel, adjust **participation** and **cost assumptions** to see how NBCSP outcomes change. The analysis models the cohort of people who are eligible for NBCSP screening between 2026 and 2045."
-# )
+
 st.markdown("Using the left panel, adjust **participation** and **cost assumptions** to see how NBCSP outcomes change.")
-# st.markdown("The **modelled cohort** includes all individuals eligible for NBCSP screening between 2026 and 2045, i.e. people born between 1952 and 2000.")
 # Sidebar controls
 st.sidebar.header("Analysis Configuration")
-
-# # Participation rate slider with predefined scenarios
-# participation_rate = st.sidebar.slider(
-#     "Participation Rate Multiplier",
-#     min_value=0.5,
-#     max_value=1.5,
-#     value=1.0,
-#     step=0.01,
-#     help="Choose participation level. Values will be interpolated between available scenarios."
-# )
-#
-# # Participation rate slider with percentage display
-# participation_percentage = st.sidebar.slider(
-#     "Relative change in uptake probability (%) in persistent never-screeners",
-#     min_value=-50.0,  # -50% decrease
-#     max_value=50.0,   # +50% increase
-#     value=0.0,        # 0% change (no change)
-#     step=1.0,
-#     format="%.2f",    # Display with 2 decimal place  "%.2f"
-#     help="Choose participation level change. Negative values decrease uptake, positive values increase uptake. "
-# )
 
 participation_percentage = st.sidebar.slider(
     "Relative change in uptake rate (%) in persistent never-screeners",
@@ -655,11 +609,8 @@ participation_percentage = st.sidebar.slider(
 )
 st.sidebar.text(f"Selected: {participation_percentage:+.1f}%")
 
-# Convert percentage to multiplier for your functions
+# Convert percentage to multiplier for the functions
 participation_rate = 1.0 + (participation_percentage / 100.0)
-
-# # Optional: Display the actual multiplier for reference
-# st.sidebar.caption(f"Multiplier: {participation_rate:.2f}x")
 
 
 start_year = 2026
@@ -717,20 +668,7 @@ unit_costs = {
                                                key='colonoscopy_comp_cost')
 }
 
-# Treatment cost multiplier
-# participation_percentage = st.sidebar.slider(
-#     "Relative change in uptake probability (%) in persistent never-screeners",
-#     min_value=-50.0,
-#     max_value=50.0,
-#     value=0.0,
-#     step=1.0,
-#     format="%.1f",
-#     help="Choose participation level change. Negative values decrease uptake, positive values increase uptake."
-# )
-# st.sidebar.text(f"Selected: {participation_percentage:+.1f}%")
-#
-# # Convert percentage to multiplier for your functions
-# participation_rate = 1.0 + (participation_percentage / 100.0)
+
 st.sidebar.subheader("Treatment Cost Adjustment")
 st.sidebar.markdown("*Adjust treatment costs to account for inflation, regional differences, or updated cost estimates.*")
 treatment_cost_percentage = st.sidebar.slider(
@@ -743,28 +681,22 @@ treatment_cost_multiplier = 1.0 + (treatment_cost_percentage / 100.0)
 
 # Generate scenario data with interpolation
 comparator_data = interpolate_all_data(annual_df, 0)  # Baseline
-# baseline = interpolate_all_data(annual_df,0)
 
-scenario_data = interpolate_all_data(annual_df, participation_rate)  #1.5)#
+scenario_data = interpolate_all_data(annual_df, participation_rate)
 
 comparator_data = add_cost_calculations(comparator_data)
-# baseline = add_cost_calculations(baseline)
+
 scenario_data = add_cost_calculations(scenario_data)
 
 comparator_df = calculate_totals(comparator_data)
 # print(comparator_df.to_markdown())
 scenario_df = calculate_totals(scenario_data)
-# baseline_df = calculate_totals(baseline)
 # print(baseline_df.to_markdown())
 
 lifetime_comparator_results = get_lifetime_results(total_df, 0)
-# lifetime_baseline_results = get_lifetime_results(total_df,0)
 lifetime_scenario_results = get_lifetime_results(total_df, participation_rate)
-# print(lifetime_comparator_results)
-# print(lifetime_baseline_results)
-# Display current interpolation info
-# if participation_rate not in [0.5, 0.75, 1.0, 1.25, 1.5]:
-# st.info(f"Current analysis uses {participation_rate:.2f}x participation rate vs the baseline for persistent never-screeners.")
+
+# Display current participation info
 if participation_percentage > 0:
     st.info(f"Current analysis assumes all persistent never-screeners receive an NBCSP letter only, with only those who request a kit receiving one. It simulates a relative {participation_percentage:.1f}% participation increase vs the comparator for persistent never-screeners and a ${unit_costs['letter']:.2f} cost per letter sent to this group. The comparator is the current NBCSP status quo, with kits being sent to persistent never-screeners.")
 elif participation_percentage < 0:
@@ -773,40 +705,28 @@ else:
     st.info(f"Current analysis assumes all persistent never-screeners receive an NBCSP letter only, with only those who request a kit receiving one. It simulates no participation change vs the comparator for persistent never-screeners and a ${unit_costs['letter']:.2f} cost per letter sent to this group. The comparator is the current NBCSP status quo, with kits being sent to persistent never-screeners.")
 
 st.markdown("### Key Metrics Overview")
-# st.markdown("Showing **differences** between selected scenario and comparator (2026-2045), except where noted")
-st.markdown("Showing **annual differences** between the selected scenario and the comparator (2026-2045)")  #, except where noted")
+st.markdown("Showing **annual differences** between the selected scenario and the comparator (2026-2045)")
 
 # Key metrics display
-
-# st.markdown("#### Screening Activity")
 col1, col2, col3 = st.columns(3)
-# Letters, FOBT kits, Colonoscopies
-# col1, col2, col3, col4 = st.columns(4)
 
 with col1:
     total_letters_only = \
     scenario_df[scenario_df['Outcome'] == 'persistent_never_screeners'][f'total_{start_year}_{end_year}'].iloc[0]
-    # comparator_letters_only = \
-    # comparator_df[comparator_df['Outcome'] == 'persistent_never_screeners'][f'total_{start_year}_{end_year}'].iloc[0]
-    # diff_letters = total_letters_only - comparator_letters_only
-    # pct_letters = (diff_letters / comparator_letters_only * 100) if comparator_letters_only != 0 else 0
+
     scenario_total_invitation = \
         scenario_df[scenario_df['Outcome'] == 'Invitation_sent_total'][f'total_{start_year}_{end_year}'].iloc[
             0]
 
     pct_letters = (total_letters_only / scenario_total_invitation * 100)
     # Format with M for millions
-    # total_letters_display = f"{total_letters_only / 1_000_000:+.1f}M"
     total_letters_display = f"{total_letters_only / 1_000_000 / 20:+.1f}M"
     total_invitation_display = f"{scenario_total_invitation / 1_000_000:.1f}M"
 
     st.metric(
         "Letters to Never-Screeners",
         total_letters_display
-        # delta=f"{diff_letters:+,.0f} ({diff_letters / comparator_letters_only:+.4f}%)"
-        # delta=f"{pct_letters:+.1f}%"
     )
-    # st.caption(f"2026-2045 total: {total_invitation_display} ({pct_letters:.1f}%)")
 
 with col2:
     comparator_letters_only = comparator_df[comparator_df['Outcome'] == 'persistent_never_screeners'][f'total_{start_year}_{end_year}'].iloc[0]
@@ -836,9 +756,8 @@ with col3:
         f"{diff_fobt/20:+,.0f}",
         delta=f"{pct_fobt:+.1f}%"
     )
-    # st.caption(f"2026-2045 total: {total_fobt:,.0f}")
 
-# st.markdown("#### Health & Cost Impact")
+
 col4, col5, col6 = st.columns(3)
 with col4:
     total_incidence = scenario_df[scenario_df['Outcome'] == 'CRC_cases'][f'total_{start_year}_{end_year}'].iloc[0]
@@ -848,13 +767,11 @@ with col4:
     pct_cases = (cases_prevented / comparator_incidence * 100) if comparator_incidence != 0 else 0
 
     st.metric(
-        # "CRC Cases Prevented Δ",
-        # f"{cases_prevented:+,.0f}",
         "CRC Cases",
         f"{cases_prevented/20:+,.0f}",
         delta=f"{pct_cases:+.1f}%"
     )
-    # st.caption(f"2026-2045 total: {total_incidence:,.0f}")
+
 with col5:
     total_cost = scenario_df[scenario_df['Outcome'] == 'total_cost'][f'total_{start_year}_{end_year}'].iloc[0]
     comparator_total_cost = \
@@ -863,40 +780,14 @@ with col5:
     pct_cost = (cost_diff / comparator_total_cost * 100) if comparator_total_cost != 0 else 0
 
     st.metric(
-        # "Total Cost Δ (2026-2045)",
-        # f"${cost_diff / 1_000_000:+.1f}M",
         "Total Cost",
         f"${cost_diff / 1_000_000 / 20:+.1f}M",
         delta=f"{pct_cost:+.1f}%"
     )
-    # st.caption(f"2026-2045 total: ${total_cost / 1_000_000:.1f}M")
 
-# with col6:
-#     # Lifetime costs
-#     total_cost_lifetime = \
-#     scenario_df[scenario_df['Outcome'] == 'total_cost'][f'total_{start_year}_{lifetime_year}'].iloc[0]
-#     comparator_cost_lifetime = \
-#     comparator_df[comparator_df['Outcome'] == 'total_cost'][f'total_{start_year}_{lifetime_year}'].iloc[0]
-#     cost_diff_lifetime = total_cost_lifetime - comparator_cost_lifetime
-#     pct_cost_lifetime = (cost_diff_lifetime / comparator_cost_lifetime * 100) if comparator_cost_lifetime != 0 else 0
-#
-#     st.metric(
-#         "Lifetime Total Cost (Modelled Cohort)",
-#         f"${cost_diff_lifetime / 1_000_000:+.1f}M",
-#         delta=f"{pct_cost_lifetime:+.1f}%"
-#     )
-#     # st.caption(
-#     #     f"Lifetime total: ${total_cost_lifetime / 1_000_000:.1f}M")
 
-# if cost_diff_lifetime > 0:
-#     st.markdown(
-#     "**Note:** Costs decrease over 2026–2045, but lifetime costs increase as short-term savings are offset by downstream costs later in life, such as treatment for cancers detected at a later stage or progression to more advanced disease."
-#     )
-# elif cost_diff_lifetime < 0:
-#     st.markdown(
-#         "**Note:** Costs increase over 2026–2045, but lifetime costs decrease as early investments are offset by avoided downstream costs, such as preventing advanced cancer treatments later in life."
-#     )
-# Tabs (rest of the code remains the same as original)
+
+# Tabs
 tab1, tab2, tab3, tab4 = st.tabs(
     ["Screening Activity", "Health Outcomes", "Cost Analysis", "Cost-Effectiveness"])
 
@@ -1881,13 +1772,14 @@ with tab4:
 
     # Show cost-effectiveness regions in the bottom-left quadrant
     # Scale the threshold lines for the data range (costs in millions, life-years in thousands)
-    x_fill = np.linspace(x_min, 0, 100)  # Changed: from x_min to 0 instead of 0 to x_max
+    # x_fill = np.linspace(x_min, 0, 100)  # Changed: from x_min to 0 instead of 0 to x_max
+    x_fill = np.linspace(x_min, x_max, 100)  # Changed: from x_min to 0 instead of 0 to x_max
 
-    # # Define boundary lines ($/life-year slopes converted to millions$/life-year)
-    # y0 = np.zeros_like(x_fill)
-    # y30 = (30000 / 1000000) * x_fill  # $30k per life-year in millions
-    # y50 = (50000 / 1000000) * x_fill  # $50k per life-year in millions
-    #
+    # Define boundary lines ($/life-year slopes converted to millions$/life-year)
+    y0 = np.zeros_like(x_fill)
+    y30 = (30000 / 1000000) * x_fill  # $30k per life-year in millions
+    y50 = (50000 / 1000000) * x_fill  # $50k per life-year in millions
+
     # # 1️⃣ Shade between y=0 and y=30,000x (most cost-effective)
     # fig.add_trace(go.Scatter(
     #     x=np.concatenate([x_fill, x_fill[::-1]]),
@@ -1921,15 +1813,51 @@ with tab4:
     #     hoverinfo="skip",
     #     showlegend=False
     # ))
-
+    #
     # # Add threshold lines as references
     # fig.add_trace(go.Scatter(x=x_fill, y=y30, mode='lines',
-    #                          line=dict(color='green', width=1, dash='dot'),
+    #                          line=dict(color='blue', width=2, dash='dot'),
     #                          name='$30k/life-year', showlegend=False, hoverinfo="skip"))
     # fig.add_trace(go.Scatter(x=x_fill, y=y50, mode='lines',
-    #                          line=dict(color='orange', width=1, dash='dot'),
+    #                          line=dict(color='orange', width=2, dash='dot'),
     #                          name='$50k/life-year', showlegend=False, hoverinfo="skip"))
-    #
+
+    # Add threshold lines
+    fig.add_trace(go.Scatter(x=x_fill, y=y30, mode='lines',
+                             line=dict(color='blue', width=1),
+                             name='$30k/life-year', showlegend=False, hoverinfo="skip"))
+    fig.add_trace(go.Scatter(x=x_fill, y=y50, mode='lines',
+                             line=dict(color='orange', width=1),
+                             name='$50k/life-year', showlegend=False, hoverinfo="skip"))
+
+    # Update layout with RIGHT margin
+    fig.update_layout(
+        title="Cost-Effectiveness Plane",
+        xaxis_title="Incremental Life Years",
+        yaxis_title="Incremental Costs ($)",
+        margin=dict(r=200, t=80, b=80, l=80),
+        showlegend=True
+    )
+
+    # Add legend box OUTSIDE on the right
+    fig.add_annotation(
+        xref='paper', yref='paper',
+        x=0.9,  # Outside the plot
+        y=0.75,
+        xanchor='left',
+        yanchor='top',
+        text="<b>WTP Thresholds</b><br><br>"
+             "<span style='color:blue; font-size:16px'>━</span> $30,000/LYS<br>"
+             "<span style='color:orange; font-size:16px'>━</span> $50,000/LYS",
+        showarrow=False,
+        font=dict(size=11),
+        align='left',
+        bgcolor='white',
+        bordercolor='#999',
+        borderwidth=1,
+        borderpad=1
+    )
+
     # # Add region labels if they fit
     # if abs(x_min) > 1000:  # Changed: check x_min instead of x_max
     #     x_label = x_min * 0.9  # Changed: use x_min instead of x_max
