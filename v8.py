@@ -644,30 +644,54 @@ if st.sidebar.button("Reset to Default Values"):
     st.session_state['colonoscopy_comp_cost'] = cost_COL_w_complication
     st.rerun()
 
+# unit_costs = {
+#     'letter': st.sidebar.number_input("Cost of mailing NBCSP letter",
+#                                      min_value=0.0, value=cost_letter, step=0.10, format="%.2f",
+#                                      key='letter_postage_cost'),
+#     'kit_postage': st.sidebar.number_input("Cost of mailing iFOBT kit",
+#                                      min_value=0.0, value=postage, step=0.10, format="%.2f",
+#                                      key='kit_postage_cost'),
+#     'FOBT_kit': st.sidebar.number_input("Cost of iFOBT kit",
+#                                        min_value=0.0, value=cost_test_kit, step=0.50, format="%.2f",
+#                                        key='fobt_kit_cost'),
+#     'process_kit': st.sidebar.number_input("Cost of iFOBT kit analysis",
+#                                           min_value=0.0, value=cost_process_kit, step=1.00, format="%.2f",
+#                                           key='process_kit_cost'),
+#     'gp_consult': st.sidebar.number_input("Cost of GP consultation",
+#                                          min_value=0.0, value=cost_GP_consultation, step=5.00, format="%.2f",
+#                                          key='gp_consult_cost'),
+#     'colonoscopy_no_comp': st.sidebar.number_input("Cost of colonoscopy (no complications)",
+#                                                    min_value=0.0, value=cost_COL_no_complication, step=50.00, format="%.2f",
+#                                                    key='colonoscopy_no_comp_cost'),
+#     'colonoscopy_comp': st.sidebar.number_input("Cost of colonoscopy (with complications)",
+#                                                min_value=0.0, value=cost_COL_w_complication, step=100.00, format="%.2f",
+#                                                key='colonoscopy_comp_cost')
+# }
+
+
 unit_costs = {
     'letter': st.sidebar.number_input("Cost of mailing NBCSP letter",
-                                     min_value=0.0, value=cost_letter, step=0.10, format="%.2f",
+                                     min_value=0.0, step=0.10, format="%.2f",
                                      key='letter_postage_cost'),
     'kit_postage': st.sidebar.number_input("Cost of mailing iFOBT kit",
-                                     min_value=0.0, value=postage, step=0.10, format="%.2f",
+                                     min_value=0.0, step=0.10, format="%.2f",
                                      key='kit_postage_cost'),
     'FOBT_kit': st.sidebar.number_input("Cost of iFOBT kit",
-                                       min_value=0.0, value=cost_test_kit, step=0.50, format="%.2f",
+                                       min_value=0.0, step=0.50, format="%.2f",
                                        key='fobt_kit_cost'),
     'process_kit': st.sidebar.number_input("Cost of iFOBT kit analysis",
-                                          min_value=0.0, value=cost_process_kit, step=1.00, format="%.2f",
+                                          min_value=0.0, step=1.00, format="%.2f",
                                           key='process_kit_cost'),
     'gp_consult': st.sidebar.number_input("Cost of GP consultation",
-                                         min_value=0.0, value=cost_GP_consultation, step=5.00, format="%.2f",
+                                         min_value=0.0, step=5.00, format="%.2f",
                                          key='gp_consult_cost'),
     'colonoscopy_no_comp': st.sidebar.number_input("Cost of colonoscopy (no complications)",
-                                                   min_value=0.0, value=cost_COL_no_complication, step=50.00, format="%.2f",
+                                                   min_value=0.0, step=50.00, format="%.2f",
                                                    key='colonoscopy_no_comp_cost'),
     'colonoscopy_comp': st.sidebar.number_input("Cost of colonoscopy (with complications)",
-                                               min_value=0.0, value=cost_COL_w_complication, step=100.00, format="%.2f",
+                                               min_value=0.0, step=100.00, format="%.2f",
                                                key='colonoscopy_comp_cost')
 }
-
 
 st.sidebar.subheader("Treatment Cost Adjustment")
 st.sidebar.markdown("*Adjust treatment costs to account for inflation, regional differences, or updated cost estimates.*")
