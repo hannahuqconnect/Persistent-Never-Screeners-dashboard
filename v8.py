@@ -28,11 +28,11 @@ else:
 def load_data():
     """Load and process data from Excel file"""
     # Read main data
-    annual_data = pd.read_excel("input_file_2025_09_12_annual.xlsx", 'inputs_annual')
-    total_data = pd.read_excel("input_file_2025_09_12_annual.xlsx", 'inputs_total')
+    annual_data = pd.read_excel("input_file_2025_11_13_annual.xlsx", 'inputs_annual')
+    total_data = pd.read_excel("input_file_2025_11_13_annual.xlsx", 'inputs_total')
 
     # Read cost inputs
-    cost_inputs = pd.read_excel("input_file_2025_09_12_annual.xlsx", 'Cost inputs',
+    cost_inputs = pd.read_excel("input_file_2025_11_13_annual.xlsx", 'Cost inputs',
                                 skiprows=6, usecols="A:B", nrows=14)
 
     return annual_data, total_data, cost_inputs
@@ -784,6 +784,16 @@ with col3:
 
 col4, col5, col6 = st.columns(3)
 with col4:
+    comparator_uptake = 0.0971
+    scenario_uptake = comparator_uptake * participation_rate
+    pct_uptake_change = (scenario_uptake - comparator_uptake)/comparator_uptake
+    st.metric(
+        "Overall Uptake Rate in Never-Screeners",
+        f"{scenario_uptake*100:.1f}%",
+        delta=f"{pct_uptake_change*100:+.1f}%"
+    )
+
+with col5:
     total_incidence = scenario_df[scenario_df['Outcome'] == 'CRC_cases'][f'total_{start_year}_{end_year}'].iloc[0]
     comparator_incidence = \
     comparator_df[comparator_df['Outcome'] == 'CRC_cases'][f'total_{start_year}_{end_year}'].iloc[0]
@@ -796,7 +806,7 @@ with col4:
         delta=f"{pct_cases:+.1f}%"
     )
 
-with col5:
+with col6:
     total_cost = scenario_df[scenario_df['Outcome'] == 'total_cost'][f'total_{start_year}_{end_year}'].iloc[0]
     comparator_total_cost = \
     comparator_df[comparator_df['Outcome'] == 'total_cost'][f'total_{start_year}_{end_year}'].iloc[0]
@@ -886,10 +896,10 @@ with tab1:
                 # Alternate between columns for 2x2 layout
                 if i % 2 == 0:
                     with col1:
-                        st.plotly_chart(fig, use_container_width=True)
+                        st.plotly_chart(fig, width='stretch')
                 else:
                     with col2:
-                        st.plotly_chart(fig, use_container_width=True)
+                        st.plotly_chart(fig, width='stretch')
     else:
         st.warning("No screening activity metrics found in the data.")
 
@@ -948,10 +958,10 @@ with tab1:
     # styled_df = df_screening.style.format({
     #     'Comparator (2026-2045 Total)': "{:,.0f}",
     #     'Selected Scenario (2026-2045 Total)': "{:,.0f}"
-    # }).applymap(color_difference, subset=['Difference'])
+    # }).map(color_difference, subset=['Difference'])
     #
     # # Display the styled dataframe
-    # st.dataframe(styled_df, use_container_width=True)
+    # st.dataframe(styled_df, width='stretch')
    # Create styled DataFrame: format numbers and color differences
     styled_df = (
         df_screening.style
@@ -961,7 +971,7 @@ with tab1:
             'Comparator': "{:,.0f}",
             'Selected Scenario': "{:,.0f}"
         })
-        .applymap(color_difference, subset=['Difference'])
+        .map(color_difference, subset=['Difference'])
         # Hide the index
         .hide(axis="index")
         .set_table_styles(
@@ -1043,7 +1053,7 @@ with tab2:
     #         showlegend=False
     #     )
     #
-    #     st.plotly_chart(fig_inc, use_container_width=True)
+    #     st.plotly_chart(fig_inc, width='stretch')
     #     if participation_percentage > 0:
     #         st.caption("The short-term increase in CRC cases is due to earlier detection.")
     #     elif participation_percentage < 0:
@@ -1102,7 +1112,7 @@ with tab2:
             showlegend=False
         )
 
-        st.plotly_chart(fig_inc, use_container_width=True)
+        st.plotly_chart(fig_inc, width='stretch')
 
         # Optional caption for context
         if participation_percentage > 0:
@@ -1152,7 +1162,7 @@ with tab2:
             showlegend=False
         )
 
-        st.plotly_chart(fig_mort, use_container_width=True)
+        st.plotly_chart(fig_mort, width='stretch')
         # st.caption("Positive values indicate deaths prevented by the scenario compared with the comparator.")
 
 
@@ -1213,7 +1223,7 @@ with tab2:
             'Comparator': "{:,.0f}",
             'Selected Scenario': "{:,.0f}"
         })
-        .applymap(color_difference, subset=['Difference'])
+        .map(color_difference, subset=['Difference'])
         # Hide the index
         .hide(axis="index")
         .set_table_styles(
@@ -1355,7 +1365,7 @@ with tab3:
         hovermode='x unified'
     )
 
-    st.plotly_chart(fig_costs, use_container_width=True)
+    st.plotly_chart(fig_costs, width='stretch')
     st.markdown(
         "<p style='font-size: 0.85em; color: gray;'>Note: The modelled cohort includes all individuals eligible for NBCSP screening between 2026 and 2045, i.e. people born between 1952 and 2000.</p>",
         unsafe_allow_html=True
@@ -1415,9 +1425,9 @@ with tab3:
         else:
             return 'color: black'
 
-    # styled_df = df_cost_summary.style.applymap(color_diff, subset=['Difference over 2026-2045 (AUD, million)','Difference over Lifetime (AUD, million)'])
+    # styled_df = df_cost_summary.style.map(color_diff, subset=['Difference over 2026-2045 (AUD, million)','Difference over Lifetime (AUD, million)'])
     #
-    # st.dataframe(styled_df, use_container_width=True)
+    # st.dataframe(styled_df, width='stretch')
 
     # Create styled DataFrame: format numbers and color differences
     styled_df = (
@@ -1428,8 +1438,8 @@ with tab3:
         #     'Comparator': "{:,.0f}",
         #     'Selected Scenario': "{:,.0f}"
         # })
-        # .applymap(color_diff, subset=['Difference over 2026-2045 (AUD, million)','Difference over Lifetime (AUD, million)'])
-        .applymap(color_diff, subset=['Annual Difference, 2026-2045 (AUD, million)','Lifetime Difference (AUD, million)'])
+        # .map(color_diff, subset=['Difference over 2026-2045 (AUD, million)','Difference over Lifetime (AUD, million)'])
+        .map(color_diff, subset=['Annual Difference, 2026-2045 (AUD, million)','Lifetime Difference (AUD, million)'])
         # Hide the index
         .hide(axis="index")
         .set_table_styles(
@@ -2008,7 +2018,7 @@ with tab4:
         font=dict(size=10)
     )
 
-    st.plotly_chart(fig, use_container_width=True)
+    st.plotly_chart(fig, width='stretch')
 
 
     # elif lifeyears_gained == 0:
