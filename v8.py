@@ -1857,11 +1857,11 @@ with tab4:
     #                          name='$50k/life-year', showlegend=False, hoverinfo="skip"))
 
     # Add threshold lines
-    fig.add_trace(go.Scatter(x=x_fill, y=y30, mode='lines',
-                             line=dict(color='blue', width=1),
-                             name='$30k/life-year', showlegend=False, hoverinfo="skip"))
+    # fig.add_trace(go.Scatter(x=x_fill, y=y30, mode='lines',
+    #                          line=dict(color='blue', width=1),
+    #                          name='$30k/life-year', showlegend=False, hoverinfo="skip"))
     fig.add_trace(go.Scatter(x=x_fill, y=y50, mode='lines',
-                             line=dict(color='orange', width=1),
+                             line=dict(color='blue', width=1),
                              name='$50k/life-year', showlegend=False, hoverinfo="skip"))
 
     # Update layout with RIGHT margin
@@ -1881,8 +1881,8 @@ with tab4:
         xanchor='left',
         yanchor='top',
         text="<b>WTP Thresholds</b><br><br>"
-             "<span style='color:blue; font-size:16px'>━</span> $30,000/LYS<br>"
-             "<span style='color:orange; font-size:16px'>━</span> $50,000/LYS",
+             # "<span style='color:blue; font-size:16px'>━</span> $30,000/LYS<br>"
+             "<span style='color:blue; font-size:16px'>━</span> $50,000/LYS",
         showarrow=False,
         font=dict(size=11),
         align='left',
@@ -1923,15 +1923,15 @@ with tab4:
     fig.add_shape(type="rect", x0=0, y0=y_min, x1=x_max, y1=0,
                   fillcolor="rgba(0, 255, 0, 0.03)", line=dict(width=0))
 
-    # Add quadrant labels (adjusted positioning for new scale)
+    # Add quadrant labels (adjusted positioning for new scale)Less costly/More costly, Lower/Higher health benefits
     label_size = 10
-    fig.add_annotation(x=x_max * 0.85, y=y_max * 0.85, text="Potentially cost-effective<br>(WTP threshold-dependent)",
+    fig.add_annotation(x=x_max * 0.85, y=y_max * 0.85, text="More costly & Higher health benefits",
                        showarrow=False, font=dict(size=label_size, color="blue"))
-    fig.add_annotation(x=x_min * 0.85, y=y_max * 0.85, text="Dominated<br>(More costly & Less effective)",
+    fig.add_annotation(x=x_min * 0.85, y=y_max * 0.85, text="More costly & Lower health benefits",
                        showarrow=False, font=dict(size=label_size, color="red"))
-    fig.add_annotation(x=x_min * 0.85, y=y_min * 0.85, text="Trade-off<br>(Less costly & Less effective)",
+    fig.add_annotation(x=x_min * 0.85, y=y_min * 0.85, text="Less costly & Lower health benefits",
                        showarrow=False, font=dict(size=label_size, color="orange"))
-    fig.add_annotation(x=x_max * 0.85, y=y_min * 0.85, text="Dominant<br>(Less costly & More effective)",
+    fig.add_annotation(x=x_max * 0.85, y=y_min * 0.85, text="Less costly & Higher health benefits",
                        showarrow=False, font=dict(size=label_size, color="green"))
 
     # Add axes lines
