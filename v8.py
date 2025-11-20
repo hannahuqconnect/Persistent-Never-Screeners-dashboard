@@ -1896,13 +1896,13 @@ with tab4:
 
     # Add quadrant labels (adjusted positioning for new scale)Less costly/More costly, Lower/Higher health benefits
     label_size = 10
-    fig.add_annotation(x=x_max * 0.85, y=y_max * 0.85, text="More costly & Higher health benefits",
+    fig.add_annotation(x=x_max * 0.77, y=y_max * 0.85, text="More costly & Higher health benefits",
                        showarrow=False, font=dict(size=label_size, color="blue"))
-    fig.add_annotation(x=x_min * 0.85, y=y_max * 0.85, text="More costly & Lower health benefits",
+    fig.add_annotation(x=x_min * 0.77, y=y_max * 0.85, text="More costly & Lower health benefits",
                        showarrow=False, font=dict(size=label_size, color="red"))
-    fig.add_annotation(x=x_min * 0.85, y=y_min * 0.85, text="Less costly & Lower health benefits",
+    fig.add_annotation(x=x_min * 0.77, y=y_min * 0.85, text="Less costly & Lower health benefits",
                        showarrow=False, font=dict(size=label_size, color="orange"))
-    fig.add_annotation(x=x_max * 0.85, y=y_min * 0.85, text="Less costly & Higher health benefits",
+    fig.add_annotation(x=x_max * 0.77, y=y_min * 0.85, text="Less costly & Higher health benefits",
                        showarrow=False, font=dict(size=label_size, color="green"))
 
     # Add axes lines
