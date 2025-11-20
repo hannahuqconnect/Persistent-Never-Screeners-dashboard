@@ -9,7 +9,7 @@ import math
 st.set_page_config(page_title="NBCSP Cost-Effectiveness Dashboard", layout="wide")
 
 #The password to access the data
-PASSWORD = "dohacneverscreeners"
+PASSWORD = "persistentneverscreeners"
 
 
 st.sidebar.title("Login")
@@ -586,42 +586,27 @@ def get_cumulative_outcome(data, outcome, years):
 
 
 # Title and description
-st.title("NBCSP Cost-Effectiveness Dashboard")
+st.title("Persistent Never-screeners Dashboard")
 
 st.markdown(
     """
-    This dashboard models the **cost-effectiveness** and **health outcomes** of alternative outreach strategies for persistent never-screeners in the National Bowel Cancer Screening Program (NBCSP). **Persistent never-screeners** are those who have received at least three NBCSP kits but have not participated in screening. The **modelled cohort** includes all individuals eligible for NBCSP screening between 2026 and 2045, i.e. people born between 1952 and 2000.
+    This dashboard models the **cost-effectiveness** and **health outcomes** of a letter-based pathway for persistent never-screeners in the National Bowel Cancer Screening Program (NBCSP). **Persistent never-screeners** are those who have received at least three NBCSP kits but have not participated in screening. The **modelled cohort** includes all individuals eligible for NBCSP screening between 2026 and 2045, i.e. people born between 1952 and 2000.
     """
 )
 
-st.markdown("Using the left panel, adjust **participation** and **cost assumptions** to see how NBCSP outcomes change.")
-# Sidebar controls
-st.sidebar.header("Analysis Configuration")
-
-participation_percentage = st.sidebar.slider(
-    "Relative change in uptake rate (%) in persistent never-screeners",
-    min_value=-50.0,
-    max_value=50.0,
-    value=0.0,
-    step=0.1,
-    format="%.1f",
-    help="Choose participation level change. Negative values decrease uptake, positive values increase uptake."
-)
-st.sidebar.text(f"Selected: {participation_percentage:+.1f}%")
-
-# Convert percentage to multiplier for the functions
-participation_rate = 1.0 + (participation_percentage / 100.0)
-
+st.markdown("Using the left panel, adjust **uptake** (the likelihood of participating in the NBCSP for the first time) and **cost assumptions** to see how NBCSP outcomes change.")
 
 start_year = 2026
 end_year = 2045
 lifetime_year = 2099
 
 
-# Individual cost parameters
-st.sidebar.subheader("Unit Cost Parameters (AUD)")
-
+# Sidebar controls
+st.sidebar.header("Analysis Configuration")
 # Initialize defaults in session state if not present
+if "participation_percentage" not in st.session_state:
+    st.session_state["participation_percentage"] = 0.0
+
 if 'unit_costs_initialized' not in st.session_state:
     st.session_state['letter_postage_cost'] = cost_letter
     st.session_state['kit_postage_cost'] = postage
@@ -632,9 +617,15 @@ if 'unit_costs_initialized' not in st.session_state:
     st.session_state['colonoscopy_comp_cost'] = cost_COL_w_complication
     st.session_state['unit_costs_initialized'] = True
 
+if "treatment_cost_percentage" not in st.session_state:
+    st.session_state["treatment_cost_percentage"] = 0.0
+
 # Add reset button
 if st.sidebar.button("Reset to Default Values"):
     # Reset to default values by setting them explicitly
+    st.session_state["participation_percentage"] = 0.0
+    st.session_state["treatment_cost_percentage"] = 0.0
+
     st.session_state['letter_postage_cost'] = cost_letter
     st.session_state['kit_postage_cost'] = postage
     st.session_state['fobt_kit_cost'] = cost_test_kit
@@ -644,30 +635,24 @@ if st.sidebar.button("Reset to Default Values"):
     st.session_state['colonoscopy_comp_cost'] = cost_COL_w_complication
     st.rerun()
 
-# unit_costs = {
-#     'letter': st.sidebar.number_input("Cost of mailing NBCSP letter",
-#                                      min_value=0.0, value=cost_letter, step=0.10, format="%.2f",
-#                                      key='letter_postage_cost'),
-#     'kit_postage': st.sidebar.number_input("Cost of mailing iFOBT kit",
-#                                      min_value=0.0, value=postage, step=0.10, format="%.2f",
-#                                      key='kit_postage_cost'),
-#     'FOBT_kit': st.sidebar.number_input("Cost of iFOBT kit",
-#                                        min_value=0.0, value=cost_test_kit, step=0.50, format="%.2f",
-#                                        key='fobt_kit_cost'),
-#     'process_kit': st.sidebar.number_input("Cost of iFOBT kit analysis",
-#                                           min_value=0.0, value=cost_process_kit, step=1.00, format="%.2f",
-#                                           key='process_kit_cost'),
-#     'gp_consult': st.sidebar.number_input("Cost of GP consultation",
-#                                          min_value=0.0, value=cost_GP_consultation, step=5.00, format="%.2f",
-#                                          key='gp_consult_cost'),
-#     'colonoscopy_no_comp': st.sidebar.number_input("Cost of colonoscopy (no complications)",
-#                                                    min_value=0.0, value=cost_COL_no_complication, step=50.00, format="%.2f",
-#                                                    key='colonoscopy_no_comp_cost'),
-#     'colonoscopy_comp': st.sidebar.number_input("Cost of colonoscopy (with complications)",
-#                                                min_value=0.0, value=cost_COL_w_complication, step=100.00, format="%.2f",
-#                                                key='colonoscopy_comp_cost')
-# }
+st.sidebar.subheader("Uptake Rate")
+participation_percentage = st.sidebar.slider(
+    "Relative change in uptake rate (%) in persistent never-screeners",
+    min_value=-50.0,
+    max_value=50.0,
+    # value=0.0,
+    step=0.1,
+    format="%.1f",
+    key='participation_percentage',
+    help="Choose relative change in uptake rate, the likelihood a never-screener participating in the NBCSP for the first time."
+)
+st.sidebar.text(f"Selected: {participation_percentage:+.1f}%")
 
+# Convert percentage to multiplier for the functions
+participation_rate = 1.0 + (participation_percentage / 100.0)
+
+# Individual cost parameters
+st.sidebar.subheader("Unit Cost Parameters (AUD)")
 
 unit_costs = {
     'letter': st.sidebar.number_input("Cost of mailing NBCSP letter",
@@ -695,13 +680,18 @@ unit_costs = {
 
 st.sidebar.subheader("Treatment Cost Adjustment")
 st.sidebar.markdown("*Adjust treatment costs to account for inflation, regional differences, or updated cost estimates.*")
+
 treatment_cost_percentage = st.sidebar.slider(
     "Treatment Cost Change (%)",
-    -50.0, 50.0, 0.0, 0.1,
+    min_value=-50.0,
+    max_value=50.0,
+    step=0.1,
     format="%.1f",
+    key="treatment_cost_percentage",
     help="Adjust CRC treatment costs"
 )
 treatment_cost_multiplier = 1.0 + (treatment_cost_percentage / 100.0)
+
 
 # Generate scenario data with interpolation
 comparator_data = interpolate_all_data(annual_df, 0)  # Baseline
@@ -722,14 +712,19 @@ lifetime_scenario_results = get_lifetime_results(total_df, participation_rate)
 
 # Display current participation info
 if participation_percentage > 0:
-    st.info(f"Current analysis assumes all persistent never-screeners receive an NBCSP letter only, with only those who request a kit receiving one. It simulates a relative {participation_percentage:.1f}% participation increase vs the comparator for persistent never-screeners and a ${unit_costs['letter']:.2f} cost per letter sent to this group. The comparator is the current NBCSP status quo, with kits being sent to persistent never-screeners.")
+    st.info(f"Current analysis assumes all persistent never-screeners receive an NBCSP letter only, with only those who request a kit receiving one. It simulates a relative {participation_percentage:.1f}% uptake increase vs the comparator for persistent never-screeners and a ${unit_costs['letter']:.2f} cost per letter sent to this group. The comparator is the current NBCSP status quo, with kits being sent to persistent never-screeners.")
 elif participation_percentage < 0:
-    st.info(f"Current analysis assumes all persistent never-screeners receive an NBCSP letter only, with only those who request a kit receiving one. It simulates a relative {-participation_percentage:.1f}% participation decrease vs the comparator for persistent never-screeners and a ${unit_costs['letter']:.2f} cost per letter sent to this group. The comparator is the current NBCSP status quo, with kits being sent to persistent never-screeners.")
+    st.info(f"Current analysis assumes all persistent never-screeners receive an NBCSP letter only, with only those who request a kit receiving one. It simulates a relative {-participation_percentage:.1f}% uptake decrease vs the comparator for persistent never-screeners and a ${unit_costs['letter']:.2f} cost per letter sent to this group. The comparator is the current NBCSP status quo, with kits being sent to persistent never-screeners.")
 else:
-    st.info(f"Current analysis assumes all persistent never-screeners receive an NBCSP letter only, with only those who request a kit receiving one. It simulates no participation change vs the comparator for persistent never-screeners and a ${unit_costs['letter']:.2f} cost per letter sent to this group. The comparator is the current NBCSP status quo, with kits being sent to persistent never-screeners.")
+    st.info(f"Current analysis assumes all persistent never-screeners receive an NBCSP letter only, with only those who request a kit receiving one. It simulates no uptake change vs the comparator for persistent never-screeners and a ${unit_costs['letter']:.2f} cost per letter sent to this group. The comparator is the current NBCSP status quo, with kits being sent to persistent never-screeners.")
+
+st.markdown(
+    "<p style='font-size: 0.85em; color: gray;'>Note: These estimates should be interpreted with caution and with consideration of the analysis limitations detailed in the report.</p>",
+    unsafe_allow_html=True
+)
 
 st.markdown("### Key Metrics Overview")
-st.markdown("Showing **annual differences** between the selected scenario and the comparator (2026-2045)")
+st.markdown("Showing **annual differences** between the selected scenario and the comparator (calculated over 2026-2045)")
 
 # Key metrics display
 col1, col2, col3 = st.columns(3)
@@ -1659,6 +1654,9 @@ with tab4:
     c = total_cost_diff
     icer = c / q if abs(lifeyears_gained) > 0 else 0
 
+    icer_status1 = "would be" if icer >= 50000 else "would not be"
+    icer_status2 = "favourable vs the status quo comparator" if icer >= 50000 else "less favourable than the status quo comparator"
+
     # Determine ICER interpretation (move this up)
     if abs(lifeyears_gained) > 0:
         if lifeyears_gained > 0:  # Positive health outcomes
@@ -1692,33 +1690,6 @@ with tab4:
     with col2:
         st.metric("Life-years change in the modelled cohort (discounted)", f"{lifeyears_gained:,.0f}")  #, delta=f"{pct_lifeyear_diff:+.2f}%")
 
-    if c==0:
-        st.info(f"No cost change")
-    elif c > 0 and q > 0:
-        # if icer <= 30000:
-        #     ce_str = "This falls below the $30k per life-year willingness-to-pay threshold, indicating that this scenario is considered cost-effective."
-        # elif icer <= 50000:
-        #     ce_str = "This falls below the $50k per life-year willingness-to-pay threshold, indicating that this scenario is considered cost-effective."
-        # else:
-        #     ce_str = "This falls above the $50k per life-year willingness-to-pay threshold, indicating that this scenario is considered not cost-effective."
-        #
-        message = f"The selected scenario is more effective but also more costly than the comparator, with an ICER of ${icer:,.0f} per life-year saved. "
-        st.success(message)
-
-    elif c>0 and q<0:
-        st.error(f"The selected scenario is less effective and more costly than the comparator.")
-    elif c<0 and q>0:
-        st.success(f"The selected scenario is more effective and cost-saving than the comparator.")
-    elif c<0 and q<0:
-        st.warning(f"The selected scenario is less costly but also less effective than the comparator.")  #, with an ICER of ${icer:,.0f} per life-year lost. The acceptability of this trade-off depends on whether the savings are considered sufficient to justify the loss in health outcomes.")
-    elif c<0 and q==0:
-        st.success(f"The selected scenario has no health impact but cost-saving than the comparator.")
-    elif c>0 and q==0:
-        st.success(f"The selected scenario has no health impact but more costly than the comparator.")
-
-    st.markdown("*All costs and life-years discounted by 5% annually from 2026.\
-                        Cost-effectiveness ratios under the indicative $50,000 per life-year saved willingness-to-pay threshold are considered cost-effective.\
-                            Change in costs includes screening-related costs, CRC diagnosis and treatment costs.*")
 
     # if lifeyears_gained != 0:  # Show plot for any non-zero life years
     # Dynamic scaling based on actual data point with padding
@@ -1998,7 +1969,7 @@ with tab4:
 
     # Layout optimized for cohort-level data
     fig.update_layout(
-        title=f"Cost-Effectiveness Analysis",
+        # title=f"Cost-Effectiveness Analysis",
         xaxis=dict(
             title="Change in total life-years (discounted)",  # Updated title
             showgrid=True, gridcolor="lightgray", gridwidth=0.5,
@@ -2020,13 +1991,40 @@ with tab4:
 
     st.plotly_chart(fig, width='stretch')
 
+    if c==0:
+        st.info(f"No cost change")
+    elif c > 0 and q > 0:
+        # if icer <= 30000:
+        #     ce_str = "This falls below the $30k per life-year willingness-to-pay threshold, indicating that this scenario is considered cost-effective."
+        # elif icer <= 50000:
+        #     ce_str = "This falls below the $50k per life-year willingness-to-pay threshold, indicating that this scenario is considered cost-effective."
+        # else:
+        #     ce_str = "This falls above the $50k per life-year willingness-to-pay threshold, indicating that this scenario is considered not cost-effective."
+        #
+        message = f"The selected scenario with a letter-based pathway is more effective but also more costly than the comparator, with an ICER of ${icer:,.0f} per life-year saved. "
+        st.success(message)
+
+    elif c>0 and q<0:
+        st.error(f"The selected scenario with a letter-based pathway is less effective and more costly than the comparator.")
+    elif c<0 and q>0:
+        st.success(f"The selected scenario with a letter-based pathway is more effective and cost-saving than the comparator.")
+    elif c<0 and q<0:
+        st.warning(f"The selected scenario with a letter-based pathway is less costly but also less effective than the comparator. The reduction in costs {icer_status1} a cost-effective trade-off compared to the reduction in life-years. From a cost-effectiveness perspective, the modelled scenario would considered {icer_status2}.")  #, with an ICER of ${icer:,.0f} per life-year lost. The acceptability of this trade-off depends on whether the savings are considered sufficient to justify the loss in health outcomes.")
+    elif c<0 and q==0:
+        st.success(f"The selected scenario with a letter-based pathway has no health impact but cost-saving than the comparator.")
+    elif c>0 and q==0:
+        st.success(f"The selected scenario with a letter-based pathway has no health impact but more costly than the comparator.")
+
+    st.markdown(
+        "The $50,000 per life-year saved willingness-to-pay threshold is usually used for evaluating strategies with an increase in health benefits; using this threshold for strategies with a decrease in health benefits and costs should be treated with caution.")
 
     # elif lifeyears_gained == 0:
     #     st.info("Cannot create cost-effectiveness plot: No change in life-years from the selected scenario")
     #     st.markdown(
     #         "The selected scenario has no measurable impact on life years, making cost-effectiveness analysis not applicable.")
-
     st.markdown(
-        "<p style='font-size: 0.85em; color: gray;'>Note: The modelled cohort includes all individuals eligible for NBCSP screening between 2026 and 2045, i.e. people born between 1952 and 2000.</p>",
+        "<p style='font-size: 0.85em; color: gray;'>Note: All costs and life-years discounted by 5% annually from 2026.\
+                        Cost-effectiveness ratios under the indicative $50,000 per life-year saved willingness-to-pay threshold are considered cost-effective.\
+                            Change in costs includes screening-related costs, CRC diagnosis and treatment costs. The modelled cohort includes all individuals eligible for NBCSP screening between 2026 and 2045, i.e. people born between 1952 and 2000.</p>",
         unsafe_allow_html=True
     )
